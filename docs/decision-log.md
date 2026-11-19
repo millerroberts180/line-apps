@@ -4,6 +4,34 @@ Newest first. Each entry records what was decided, why, what was checked, and wh
 are not rewritten: when a later decision changes one, a **Superseded** (or **Superseded in part**) note
 at the top of the earlier entry says what changed and names the entry that changed it.
 
+## 2026-11-19: Tuck's own bundle ID, and the apps signed to keep their Accessibility
+
+- **Decision:**
+  - **Tuck is `com.millerroberts.Tuck`**, where it had been `app.tuck.prototype`; Tuck's own decision
+    log has the change and how its settings carry over. The line's menu opens Tuck by the new ID, and
+    Tuck's `must-close` lists both IDs, so a Tuck from before the change is asked to quit too.
+  - **Signing without a Developer ID.** `build-bundle.sh` signs Tuck, Pulse and Glow with their own
+    local identities ("Tuck Local Signing" and the others, each made by its repository's
+    `scripts/signing-identity.sh`) when this Mac has them, as their own downloads are signed. Hum and
+    Line Apps stay ad hoc and the installer unsigned. The check at the end prints who signed each app.
+- **Why:** macOS ties the Accessibility grant to the signature. Signed ad hoc, an app from the installer
+  lost it with every update, and wasn't signed as the same app from its own download. A Tuck left open
+  under its old ID would have been replaced while it ran.
+- **Checked:**
+  - In the finished installer (`pkgutil --expand-full`): Tuck, Pulse and Glow signed by their local
+    identities under the hardened runtime, each with a designated requirement on its certificate leaf;
+    Hum and Line Apps ad hoc; five `must-close` lists, Tuck's with both IDs.
+  - On the macOS 15 test Mac (15.6.1), the choices page at last: Customize lists the five apps, all
+    ticked, Line Apps 1.3 MB, Tuck 3.6 MB, Pulse 1.4 MB, Hum 16 MB and Glow 2.8 MB, 25.1 MB in all. I
+    quit there, without installing.
+  - Tests: Line Apps 7, passing.
+- **Deferred:**
+  - **The first update after this one** still asks for Accessibility once more, for an app that was
+    signed ad hoc before; from then on the grant holds. Tuck also needs Open at Login set again, since
+    macOS keys it to the bundle ID.
+  - **Customize on macOS 14**, where Hum is left out, hasn't been watched; only macOS 15 has.
+  - **No Developer ID yet**, so macOS still asks before opening the installer (Open Anyway).
+
 ## 2026-11-19: The bundle finds the apps beside it, and the bend is drawn to read at 820
 
 - **Decision:**
@@ -45,6 +73,9 @@ at the top of the earlier entry says what changed and names the entry that chang
 
 ## 2026-11-13: The installer asks to quit the apps it replaces
 
+**Superseded in part:** Tuck's list now names its old bundle ID as well; see "Tuck's own bundle ID, and
+the apps signed to keep their Accessibility".
+
 - **Decision:** the installer lists each of its five apps under `must-close`, so Installer asks for any
   that is open to be quit before it installs.
 - **Why:** without it, Installer replaced an open app's files under it: the app kept running the old
@@ -59,7 +90,9 @@ at the top of the earlier entry says what changed and names the entry that chang
 ## 2026-11-13: Line Apps, the line that collapses the family's icons, and the bundle
 
 **Superseded in part:** the installer has since run to the end on my Mac, postinstall included; see
-"The installer asks to quit the apps it replaces".
+"The installer asks to quit the apps it replaces". Tuck, Pulse and Glow are now signed with their local
+identities, not ad hoc, and Customize has been watched on screen; see "Tuck's own bundle ID, and the
+apps signed to keep their Accessibility".
 
 - **Decision:**
   - **The line.** A menu-bar app with no Dock icon and no windows: a status item drawn in code as a

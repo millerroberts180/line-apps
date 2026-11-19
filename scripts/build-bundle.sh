@@ -5,8 +5,10 @@
 # stamped with its version as its own release is, so an app from the bundle is the app from its own
 # download.
 #
-#   scripts/build-bundle.sh [version]     apps signed ad hoc and the installer unsigned; the version
-#                                         is Line Apps' own (Resources/Info.plist) unless given
+#   scripts/build-bundle.sh [version]     Tuck, Pulse and Glow signed with their local identities if
+#                                         this Mac has them, the rest ad hoc, the installer unsigned;
+#                                         the version is Line Apps' own (Resources/Info.plist) unless
+#                                         given
 #   LINE_SIGN_IDENTITY="Developer ID Application: …" \
 #   LINE_INSTALLER_IDENTITY="Developer ID Installer: …" \
 #   LINE_NOTARY_PROFILE=line-notary scripts/build-bundle.sh
@@ -87,11 +89,24 @@ stamp "$apps/Line Apps.app" "$version" "$(build_number "$root")"
 
 # MARK: Sign
 
-# Under the hardened runtime, with the Developer ID when there is one and ad hoc otherwise. Hum's widget
-# extension goes first, with its own entitlements, so the app's signature covers it.
+# Under the hardened runtime, with the Developer ID when there is one. Without it, Tuck, Pulse and Glow
+# are signed with their own local identities when this Mac has them (each repository's
+# scripts/signing-identity.sh makes one), as their own downloads are: macOS ties the Accessibility grant
+# to the signature, so an app then keeps it across updates, whichever way it was installed. The rest are
+# signed ad hoc. Hum's widget extension goes first, with its own entitlements, so the app's signature
+# covers it.
 sign() { # sign PATH [ENTITLEMENTS]
-  local flags=(--force --options runtime)
-  if [[ -n $identity ]]; then flags+=(--timestamp --sign "$identity"); else flags+=(--sign -); fi
+  local flags=(--force --options runtime) name="${${1:t}:r}"
+  local keychain="$HOME/Library/Keychains/${(L)name}-signing.keychain-db"
+  if [[ -n $identity ]]; then
+    flags+=(--timestamp --sign "$identity")
+  elif [[ $name == (Tuck|Pulse|Glow) && -f $keychain ]] \
+      && security find-certificate -c "$name Local Signing" "$keychain" >/dev/null 2>&1; then
+    security unlock-keychain -p "${(L)name}-local-signing" "$keychain"
+    flags+=(--keychain "$keychain" --sign "$name Local Signing")
+  else
+    flags+=(--sign -)
+  fi
   if [[ -n ${2:-} ]]; then flags+=(--entitlements "$2"); fi
   codesign $flags "$1"
 }
@@ -183,7 +198,10 @@ choice() { # choice ID TITLE DESCRIPTION [ATTRIBUTES]
     print "    <pkg-ref id=\"com.millerroberts.lineapps.bundle.$id\" version=\"$(info "$apps/$app.app" CFBundleShortVersionString)\" onConclusion=\"none\">$id.pkg</pkg-ref>"
     # An app left running would be replaced under itself and keep running the old copy, so the
     # installer asks for it to be quit first.
-    print "    <pkg-ref id=\"com.millerroberts.lineapps.bundle.$id\"><must-close><app id=\"$(info "$apps/$app.app" CFBundleIdentifier)\"/></must-close></pkg-ref>"
+    # Tuck was app.tuck.prototype until 2026-11-19, so a copy from before then is asked to quit too.
+    closes="<app id=\"$(info "$apps/$app.app" CFBundleIdentifier)\"/>"
+    [[ $id == tuck ]] && closes+='<app id="app.tuck.prototype"/>'
+    print "    <pkg-ref id=\"com.millerroberts.lineapps.bundle.$id\"><must-close>$closes</must-close></pkg-ref>"
   done
   print '</installer-gui-script>'
 } > "$work/distribution.xml"
@@ -214,7 +232,8 @@ for app in $order; do
   codesign --verify --deep --strict "$shipped"
   archs="$(lipo -archs "$shipped/Contents/MacOS/$(info "$shipped" CFBundleExecutable)")"
   [[ $archs == arm64 ]] || { echo "error: $app in the installer is built for $archs, not arm64 only" >&2; exit 1; }
-  echo "  $app $(info "$shipped" CFBundleShortVersionString) ($(info "$shipped" CFBundleVersion)), $(info "$shipped" CFBundleIdentifier)"
+  signer="$(codesign -dvv "$shipped" 2>&1 | sed -n 's/^Authority=//p' | head -1)"
+  echo "  $app $(info "$shipped" CFBundleShortVersionString) ($(info "$shipped" CFBundleVersion)), $(info "$shipped" CFBundleIdentifier), signed ${signer:-ad hoc}"
 done
 [[ -x "$work/check/line.pkg/Scripts/postinstall" ]] || { echo "error: Line Apps' postinstall is missing" >&2; exit 1; }
 closing="$(grep -c '<must-close>' "$work/check/Distribution" || true)"

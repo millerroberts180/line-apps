@@ -35,13 +35,17 @@ git clone https://github.com/millerroberts180/glow ../glow
 
 `TUCK_REPO`, `PULSE_REPO`, `HUM_REPO` and `GLOW_REPO` point to a checkout elsewhere; if one is missing,
 the script stops and names the variable to set. With `LINE_SIGN_IDENTITY`, `LINE_INSTALLER_IDENTITY`
-and `LINE_NOTARY_PROFILE` it signs with a Developer ID and notarizes.
+and `LINE_NOTARY_PROFILE` it signs with a Developer ID and notarizes. Without them, Tuck, Pulse and
+Glow are signed with their own local identities when this Mac has them (each repository's
+`scripts/signing-identity.sh`), as their own downloads are, so each keeps its Accessibility grant across
+updates however it was installed; Hum and Line Apps are signed ad hoc.
 
 Everything goes into /Applications, never onto a copy found elsewhere, and a newer copy already there is
 kept. Hum's component is offered only on macOS 15 or later. Line Apps' postinstall opens it for whoever
 is logged in, so its line is in the menu bar with its note. The installer asks for any open app to be
-quit before it replaces it. Each app goes in whole, as its own script built it, so everything in its
-Resources, its third-party notices included, ships as in its own download.
+quit before it replaces it, a Tuck from before its bundle ID changed included. Each app goes in whole,
+as its own script built it, so everything in its Resources, its third-party notices included, ships as
+in its own download.
 
 The script checks what it built from inside the finished installer: each app's signature, that each is
 arm64 only, Line Apps' postinstall, and that the installer asks to close all five apps.

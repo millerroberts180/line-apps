@@ -6,8 +6,7 @@ struct FamilyApp: Equatable, Sendable {
     let bundleID: String
 
     static let all = [
-        // Tuck keeps its prototype ID until its own is chosen, in Tuck's Support/release.env.
-        FamilyApp(name: "Tuck", bundleID: "app.tuck.prototype"),
+        FamilyApp(name: "Tuck", bundleID: "com.millerroberts.Tuck"),
         FamilyApp(name: "Pulse", bundleID: "com.millerroberts.Pulse"),
         FamilyApp(name: "Hum", bundleID: "com.millerroberts.hum"),
         FamilyApp(name: "Glow", bundleID: "com.millerroberts.Glow"),
