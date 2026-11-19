@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1182 256" width="1182" height="256" role="img" aria-labelledby="title">
+  <title id="title">Line Apps logo</title>
+  <!-- Made by scripts/make-logo.swift. The curl spans x 28-228, centred on the middle of the x-height (y 128); the wordmark starts 268 in, 40 from it. -->
+  <defs>
+    <linearGradient id="family" gradientUnits="userSpaceOnUse" x1="16" y1="0" x2="240" y2="0">
+      <stop offset="0" stop-color="#7299C5"/>
+      <stop offset="0.36" stop-color="#5B4FE6"/>
+      <stop offset="0.7" stop-color="#B81D45"/>
+      <stop offset="1" stop-color="#DE8B6D"/>
+    </linearGradient>
+  </defs>
+  <g fill="none" stroke="#111316" stroke-width="24" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M28 167.47 C59.58 188.53 64.84 135.89 80.63 109.58 C101.68 72.74 159.58 78 185.89 104.32 C212.21 130.63 191.16 172.74 154.32 172.74 C128 172.74 112.21 156.95 117.47 135.89 C122.74 120.11 143.79 114.84 159.58 125.37 C175.37 135.89 180.63 167.47 228 162.21" stroke="url(#family)"/>
+    <g transform="translate(268 0)">
+      <path d="M24 32 V180"/>
+      <path d="M74 76 V180 M74 32 V32"/>
+      <path d="M124 76 V180 M124 128 A40 40 0 0 1 204 128 V180"/>
+      <path d="M254 128 H334 A40 40 0 1 0 324.6 153.7"/>
+      <path d="M524 76 V180 M444 128 A40 40 0 1 1 524 128 A40 40 0 1 1 444 128"/>
+      <path d="M574 76 V228 M574 128 A40 40 0 1 1 654 128 A40 40 0 1 1 574 128"/>
+      <path d="M704 76 V228 M704 128 A40 40 0 1 1 784 128 A40 40 0 1 1 704 128"/>
+      <path d="M882.5 89 A26 26 0 1 0 860 128 A26 26 0 1 1 837.5 167"/>
+    </g>
+  </g>
+</svg>
